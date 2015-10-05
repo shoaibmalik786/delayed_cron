@@ -34,6 +34,7 @@ GEM
       tzinfo (~> 1.1)
     arel (5.0.1.20140414130214)
     builder (3.2.2)
+    byebug (6.0.2)
     celluloid (0.15.2)
       timers (~> 1.1.0)
     codeclimate-test-reporter (0.3.0)
@@ -139,6 +140,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  byebug
   codeclimate-test-reporter
   delayed_cron!
   delayed_job
@@ -149,3 +151,6 @@ DEPENDENCIES
   sidekiq
   sucker_punch
   timecop
+
+BUNDLED WITH
+   1.10.6
