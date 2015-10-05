@@ -91,11 +91,13 @@ describe DelayedCron do
       DelayedCron.process_job(klass.name, "long_method", {})
     end
 
-    it "should reschedule the cron job after processing" do
-      klass, name = "SomeClass", "test_method"
-      build_class(klass, name)
-      DelayedCron.should_receive(:schedule).with.with(klass, name, {})
-      DelayedCron.process_job(klass, name, {})
+    it "should reschedule the cron job after processing", force: true do
+      Timecop.freeze(Time.local(2014, 1, 1, 0, 0, 0))
+      klass, name, options = "SomeClass", "test_method", { interval: 1.day, at: "12:00:00 -0400" }
+      build_class(klass, name, options)
+      reset_options = { interval: 1.day, at: "12:00:00 -0400" }
+      DelayedCron.should_receive(:schedule).with(klass, name, reset_options)
+      DelayedCron.process_job(klass, name, reset_options)
     end
 
   end

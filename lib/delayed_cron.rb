@@ -36,9 +36,11 @@ module DelayedCron
 
     def schedule(klass, method_name, options)
       if options[:at]
+        original_interval  = options[:interval]
         options[:interval] = adjust_interval(beginning_of_day(options[:interval].to_i), options[:at])
       end
       processor.enqueue_delayed_cron(klass, method_name, options)
+      options[:reset] = original_interval
     end
 
     def timing_opts(interval, options_at)
@@ -49,6 +51,10 @@ module DelayedCron
 
     def process_job(klass, method_name, options)
       # TODO: add ability to send args to klass method
+      if options[:reset].present?
+        reset_interval     = options.delete(:reset)
+        options[:interval] = reset_interval
+      end
       klass.constantize.send(method_name)
       schedule(klass, method_name, options)
     end
@@ -58,6 +64,7 @@ module DelayedCron
     end
 
     def adjust_interval(date, time_string)
+      @adjusted = true
       adjusted_date(date, time_string).to_i - Time.now.to_i
     end
 
