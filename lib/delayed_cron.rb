@@ -36,24 +36,23 @@ module DelayedCron
 
     def schedule(klass, method_name, options)
       if options[:at]
-        original_interval  = options[:interval]
         options[:interval] = adjust_interval(beginning_of_day(options[:interval].to_i), options[:at])
       end
       processor.enqueue_delayed_cron(klass, method_name, options)
-      options[:reset] = original_interval
     end
 
     def timing_opts(interval, options_at)
       timing_opts = { interval: interval }
-      timing_opts.merge!(at: options_at) if options_at.present?
+      timing_opts.merge!(at: options_at, original: interval) if options_at.present?
       timing_opts
     end
 
     def process_job(klass, method_name, options)
       # TODO: add ability to send args to klass method
-      if options[:reset].present?
-        reset_interval     = options.delete(:reset)
-        options[:interval] = reset_interval
+      
+      # IMPORTANT: hash keys must be in quotes when rescheduling
+      if options["original"]
+        options["interval"] = adjust_interval(beginning_of_day(options["original"].to_i), options["at"])
       end
       klass.constantize.send(method_name)
       schedule(klass, method_name, options)
